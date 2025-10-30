@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+    --breakpoint-avg: 900px;
+
+    --color-primary: #F97D41;
+    --color-primary-hover: #E5723C;
+
+    --color-btn: #0052CC;
+    --color-btn-hover: #188CF0;
+
+    --color-footer-text: #4A4A4A;
+    --color-info-text: #9B9B9B;
+
+    --color-line: #F1F1F1;
+
+    --color-message-text: #774400;
+    --color-message-bg: #FFEEAA;
+}

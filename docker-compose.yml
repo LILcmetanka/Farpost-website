@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ./Farpost-Backend
+      dockerfile: Dockerfile
+    container_name: go-server
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./Farpost-Backend/storage:/app/storage
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./Farpost-Frontend
+      dockerfile: Dockerfile.prod
+    container_name: frontend-prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

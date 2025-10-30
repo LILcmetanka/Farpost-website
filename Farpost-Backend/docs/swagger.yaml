@@ -1,0 +1,451 @@
+definitions:
+  blackouts.BlackoutInfo:
+    description: Информация об отключении конкретного типа
+    properties:
+      count_buildings:
+        description: Количество затронутых зданий
+        example: 15
+        type: integer
+      fraction_buildings:
+        description: Доля затронутых зданий в процентах
+        example: 25.5
+        type: number
+      time_last_blackout:
+        description: Время последнего отключения в формате "2006-01-02 15:04:05"
+        example: "2019-01-15 14:30:00"
+        type: string
+      type:
+        description: 'Тип отключения: hot_water (горячая вода), cold_water (холодная
+          вода), electricity (электричество), heat (отопление)'
+        example: hot_water
+        type: string
+    type: object
+  blackouts.Response:
+    description: Информация о текущих отключениях
+    properties:
+      blackouts:
+        items:
+          $ref: '#/definitions/blackouts.BlackoutInfo'
+        type: array
+      error:
+        description: Сообщение об ошибке (если статус ERROR)
+        example: ""
+        type: string
+      status:
+        description: 'Статус операции: OK или ERROR'
+        example: OK
+        type: string
+    type: object
+  calendar.DateInfo:
+    description: Информация об отключениях для конкретной даты
+    properties:
+      date:
+        description: Дата в формате YYYY-MM-DD
+        example: "2019-01-15"
+        type: string
+      services:
+        description: 'Список типов отключений в эту дату: hot_water, cold_water, electricity,
+          heat'
+        example:
+        - hot_water
+        - cold_water
+        items:
+          type: string
+        type: array
+    type: object
+  calendar.InfoOffs:
+    description: Детальная информация об отключениях услуг за конкретный день
+    properties:
+      amount_addresses:
+        description: Количество затронутых адресов/зданий
+        example: 25
+        type: integer
+      end_off:
+        description: Дата и время окончания отключения в формате YYYY-MM-DD HH:MM:SS
+        example: "2019-01-15 18:00:00"
+        type: string
+      service:
+        description: 'Тип отключенной услуги: hot_water, cold_water, electricity,
+          heat'
+        example: hot_water
+        type: string
+      start_off:
+        description: Дата и время начала отключения в формате YYYY-MM-DD HH:MM:SS
+        example: "2019-01-15 10:00:00"
+        type: string
+    type: object
+  complaints.Response:
+    description: Ответ с данными жалоб для построения графиков
+    properties:
+      complaints:
+        items:
+          $ref: '#/definitions/models.ComplaintData'
+        type: array
+      error:
+        description: Сообщение об ошибке (если статус ERROR)
+        example: ""
+        type: string
+      status:
+        description: 'Статус операции: OK или ERROR'
+        example: OK
+        type: string
+    type: object
+  internal_http-server_handlers_calendar_day_get.Response:
+    description: Ответ с детальной информацией об отключениях за конкретный день
+    properties:
+      blackouts:
+        items:
+          $ref: '#/definitions/calendar.InfoOffs'
+        type: array
+      error:
+        description: Сообщение об ошибке (если статус ERROR)
+        example: ""
+        type: string
+      status:
+        description: 'Статус операции: OK или ERROR'
+        example: OK
+        type: string
+    type: object
+  internal_http-server_handlers_calendar_month_get.Response:
+    description: Ответ с данными для календаря отключений по дням месяца
+    properties:
+      dates:
+        items:
+          $ref: '#/definitions/calendar.DateInfo'
+        type: array
+      error:
+        description: Сообщение об ошибке (если статус ERROR)
+        example: ""
+        type: string
+      status:
+        description: 'Статус операции: OK или ERROR'
+        example: OK
+        type: string
+    type: object
+  models.ComplaintData:
+    description: Данные жалоб по типам отключений для построения графиков
+    properties:
+      cold:
+        description: Количество жалоб на отключение холодной воды
+        example: 3
+        type: integer
+      electricity:
+        description: Количество жалоб на отключение электричества
+        example: 8
+        type: integer
+      heating:
+        description: Количество жалоб на отключение отопления
+        example: 2
+        type: integer
+      hot:
+        description: Количество жалоб на отключение горячей воды
+        example: 5
+        type: integer
+      time:
+        description: Временная метка точки данных
+        example: "2019-01-15 14:00:00"
+        type: string
+    type: object
+  organizations.OrganizationInfo:
+    description: Информация об организации и её отключениях
+    properties:
+      count_buildings:
+        description: Количество зданий организации
+        example: 106
+        type: integer
+      last_address:
+        description: Адрес последнего отключения
+        example: Карбышева ул. 54
+        type: string
+      name:
+        description: Название организации
+        example: МУПВ ВПЭС (электрические сети)
+        type: string
+      time_last_blackout:
+        description: Время последнего отключения в формате "2006-01-02 15:04:05"
+        example: "2019-01-28 09:39:00"
+        type: string
+    type: object
+  organizations.Response:
+    description: Ответ с информацией об организациях и их отключениях
+    properties:
+      error:
+        description: Сообщение об ошибке (если статус ERROR)
+        example: ""
+        type: string
+      organizations:
+        items:
+          $ref: '#/definitions/organizations.OrganizationInfo'
+        type: array
+      status:
+        description: 'Статус операции: OK или ERROR'
+        example: OK
+        type: string
+    type: object
+  response.Response:
+    description: Стандартный ответ API
+    properties:
+      error:
+        description: Сообщение об ошибке (если статус ERROR)
+        example: ""
+        type: string
+      status:
+        description: 'Статус операции: OK или ERROR'
+        example: OK
+        type: string
+    type: object
+  search.Request:
+    description: Запрос для поиска улиц по подстроке
+    properties:
+      suggest:
+        description: Подстрока для поиска улиц (минимум 2 символа)
+        example: ленин
+        type: string
+    type: object
+  search.Response:
+    description: Ответ с найденными улицами
+    properties:
+      error:
+        description: Сообщение об ошибке (если статус ERROR)
+        example: ""
+        type: string
+      status:
+        description: 'Статус операции: OK или ERROR'
+        example: OK
+        type: string
+      streets:
+        description: Список найденных улиц
+        example:
+        - ул. Ленина
+        - пр. Ленинский
+        - пл. Ленинская
+        items:
+          type: string
+        type: array
+    type: object
+info:
+  contact: {}
+  description: API для системы VLRU-PRSCH
+  title: VLRU-PRSCH API
+  version: "1.0"
+paths:
+  /off/blackouts:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает статистику по отключениям горячей/холодной воды, электричества
+        и отопления
+      parameters:
+      - description: Текущее время в формате YYYY-MM-DDTHH:MM:SSZ или YYYY-MM-DD_HH:MM:SS
+        example: 2019-01-15T14:30:00Z или 2019-01-15_14:30:00
+        in: query
+        name: curr_time
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/blackouts.Response'
+        "400":
+          description: 'Пример: {\"status\":\"ERROR\",\"error\":\"invalid time format\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Пример: {\"status\":\"ERROR\",\"error\":\"failed to get buildings
+            data\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Получить информацию об отключениях
+      tags:
+      - blackouts
+  /off/calendar:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию об отключениях по дням указанного месяца
+        для отображения в календаре
+      parameters:
+      - description: Первый месяц в формате YYYY-MM
+        example: 2019-01
+        in: query
+        name: month
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными за месяц
+          schema:
+            $ref: '#/definitions/internal_http-server_handlers_calendar_month_get.Response'
+        "400":
+          description: 'Неверный формат месяца - пример: {\"status\":\"ERROR\",\"error\":\"failed
+            to process month dates\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Ошибка при получении данных - пример: {\"status\":\"ERROR\",\"error\":\"failed
+            to get blackouts data\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить данные для календаря отключений за месяц
+      tags:
+      - calendar
+  /off/calendar/day:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает детальную информацию об отключениях услуг за указанную
+        дату, включая время отключений и количество затронутых адресов
+      parameters:
+      - description: Целевая дата в формате YYYY-MM-DD
+        example: "2019-01-15"
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с детальной информацией об отключениях
+          schema:
+            $ref: '#/definitions/internal_http-server_handlers_calendar_day_get.Response'
+        "400":
+          description: 'Отсутствует параметр date - пример: {\"status\":\"ERROR\",\"error\":\"date
+            parameter is required\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Ошибка при получении данных - пример: {\"status\":\"ERROR\",\"error\":\"failed
+            to get blackouts information\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить детальную информацию об отключениях за день
+      tags:
+      - calendar
+  /off/complaints:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает статистику жалоб за указанный период для построения
+        графиков и аналитики
+      parameters:
+      - description: 'Период для агрегации данных: hour (последний час), day (последние
+          24 часа), week (последние 7 дней), month (последние 30 дней)'
+        example: day
+        in: query
+        name: period
+        required: true
+        type: string
+      - description: Текущее время в формате YYYY-MM-DDTHH:MM:SSZ или YYYY-MM-DD_HH:MM:SS
+        example: 2019-01-15_14:30:00 или 2019-01-15T14:30:00Z
+        in: query
+        name: curr_time
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными жалоб по типам отключений
+          schema:
+            $ref: '#/definitions/complaints.Response'
+        "400":
+          description: 'Неверный период - пример: {\"status\":\"ERROR\",\"error\":\"invalid
+            period, use: hour, day, week, month\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Ошибка при получении данных - пример: {\"status\":\"ERROR\",\"error\":\"failed
+            to get complaints data\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить данные жалоб для графиков
+      tags:
+      - complaints
+  /off/orgs:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список организаций с информацией о количестве зданий
+        и последних отключениях
+      parameters:
+      - description: Текущее время в формате YYYY-MM-DDTHH:MM:SSZ или YYYY-MM-DD_HH:MM:SS
+        example: 2024-01-15_14:30:00 или 2024-01-15T14:30:00Z
+        in: query
+        name: curr_time
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными об организациях
+          schema:
+            $ref: '#/definitions/organizations.Response'
+        "400":
+          description: 'Неверный формат времени - пример: {\"status\":\"ERROR\",\"error\":\"invalid
+            time format\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Внутренняя ошибка сервера - пример: {\"status\":\"ERROR\",\"error\":\"failed
+            to get organizations\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить информацию об организациях
+      tags:
+      - organizations
+  /off/search:
+    post:
+      consumes:
+      - application/json
+      description: Поиск улиц по частичному совпадению названия. Возвращает список
+        улиц, содержащих указанную подстроку
+      parameters:
+      - description: Параметры поиска
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/search.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ со списком найденных улиц
+          schema:
+            $ref: '#/definitions/search.Response'
+        "400":
+          description: 'Слишком короткая строка поиска - пример: {\"status\":\"ERROR\",\"error\":\"suggest
+            must be at least 2 characters\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Ошибка поиска - пример: {\"status\":\"ERROR\",\"error\":\"search
+            failed\"}'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Поиск улиц по подстроке
+      tags:
+      - search
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

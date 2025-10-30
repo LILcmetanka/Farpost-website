@@ -1,0 +1,620 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для системы VLRU-PRSCH",
+        "title": "VLRU-PRSCH API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/off/blackouts": {
+            "get": {
+                "description": "Возвращает статистику по отключениям горячей/холодной воды, электричества и отопления",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blackouts"
+                ],
+                "summary": "Получить информацию об отключениях",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "2019-01-15T14:30:00Z или 2019-01-15_14:30:00",
+                        "description": "Текущее время в формате YYYY-MM-DDTHH:MM:SSZ или YYYY-MM-DD_HH:MM:SS",
+                        "name": "curr_time",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/blackouts.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"invalid time format\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"failed to get buildings data\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/off/calendar": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает информацию об отключениях по дням указанного месяца для отображения в календаре",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar"
+                ],
+                "summary": "Получить данные для календаря отключений за месяц",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "2019-01",
+                        "description": "Первый месяц в формате YYYY-MM",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ с данными за месяц",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http-server_handlers_calendar_month_get.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат месяца - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"failed to process month dates\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при получении данных - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"failed to get blackouts data\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/off/calendar/day": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает детальную информацию об отключениях услуг за указанную дату, включая время отключений и количество затронутых адресов",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar"
+                ],
+                "summary": "Получить детальную информацию об отключениях за день",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "2019-01-15",
+                        "description": "Целевая дата в формате YYYY-MM-DD",
+                        "name": "date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ с детальной информацией об отключениях",
+                        "schema": {
+                            "$ref": "#/definitions/internal_http-server_handlers_calendar_day_get.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Отсутствует параметр date - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"date parameter is required\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при получении данных - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"failed to get blackouts information\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/off/complaints": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает статистику жалоб за указанный период для построения графиков и аналитики",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "complaints"
+                ],
+                "summary": "Получить данные жалоб для графиков",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "day",
+                        "description": "Период для агрегации данных: hour (последний час), day (последние 24 часа), week (последние 7 дней), month (последние 30 дней)",
+                        "name": "period",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "2019-01-15_14:30:00 или 2019-01-15T14:30:00Z",
+                        "description": "Текущее время в формате YYYY-MM-DDTHH:MM:SSZ или YYYY-MM-DD_HH:MM:SS",
+                        "name": "curr_time",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ с данными жалоб по типам отключений",
+                        "schema": {
+                            "$ref": "#/definitions/complaints.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный период - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"invalid period, use: hour, day, week, month\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при получении данных - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"failed to get complaints data\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/off/orgs": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает список организаций с информацией о количестве зданий и последних отключениях",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "organizations"
+                ],
+                "summary": "Получить информацию об организациях",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "2024-01-15_14:30:00 или 2024-01-15T14:30:00Z",
+                        "description": "Текущее время в формате YYYY-MM-DDTHH:MM:SSZ или YYYY-MM-DD_HH:MM:SS",
+                        "name": "curr_time",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ с данными об организациях",
+                        "schema": {
+                            "$ref": "#/definitions/organizations.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат времени - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"invalid time format\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"failed to get organizations\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/off/search": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Поиск улиц по частичному совпадению названия. Возвращает список улиц, содержащих указанную подстроку",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search"
+                ],
+                "summary": "Поиск улиц по подстроке",
+                "parameters": [
+                    {
+                        "description": "Параметры поиска",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/search.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ со списком найденных улиц",
+                        "schema": {
+                            "$ref": "#/definitions/search.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Слишком короткая строка поиска - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"suggest must be at least 2 characters\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка поиска - пример: {\\\"status\\\":\\\"ERROR\\\",\\\"error\\\":\\\"search failed\\\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "blackouts.BlackoutInfo": {
+            "description": "Информация об отключении конкретного типа",
+            "type": "object",
+            "properties": {
+                "count_buildings": {
+                    "description": "Количество затронутых зданий",
+                    "type": "integer",
+                    "example": 15
+                },
+                "fraction_buildings": {
+                    "description": "Доля затронутых зданий в процентах",
+                    "type": "number",
+                    "example": 25.5
+                },
+                "time_last_blackout": {
+                    "description": "Время последнего отключения в формате \"2006-01-02 15:04:05\"",
+                    "type": "string",
+                    "example": "2019-01-15 14:30:00"
+                },
+                "type": {
+                    "description": "Тип отключения: hot_water (горячая вода), cold_water (холодная вода), electricity (электричество), heat (отопление)",
+                    "type": "string",
+                    "example": "hot_water"
+                }
+            }
+        },
+        "blackouts.Response": {
+            "description": "Информация о текущих отключениях",
+            "type": "object",
+            "properties": {
+                "blackouts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/blackouts.BlackoutInfo"
+                    }
+                },
+                "error": {
+                    "description": "Сообщение об ошибке (если статус ERROR)",
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "description": "Статус операции: OK или ERROR",
+                    "type": "string",
+                    "example": "OK"
+                }
+            }
+        },
+        "calendar.DateInfo": {
+            "description": "Информация об отключениях для конкретной даты",
+            "type": "object",
+            "properties": {
+                "date": {
+                    "description": "Дата в формате YYYY-MM-DD",
+                    "type": "string",
+                    "example": "2019-01-15"
+                },
+                "services": {
+                    "description": "Список типов отключений в эту дату: hot_water, cold_water, electricity, heat",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "hot_water",
+                        "cold_water"
+                    ]
+                }
+            }
+        },
+        "calendar.InfoOffs": {
+            "description": "Детальная информация об отключениях услуг за конкретный день",
+            "type": "object",
+            "properties": {
+                "amount_addresses": {
+                    "description": "Количество затронутых адресов/зданий",
+                    "type": "integer",
+                    "example": 25
+                },
+                "end_off": {
+                    "description": "Дата и время окончания отключения в формате YYYY-MM-DD HH:MM:SS",
+                    "type": "string",
+                    "example": "2019-01-15 18:00:00"
+                },
+                "service": {
+                    "description": "Тип отключенной услуги: hot_water, cold_water, electricity, heat",
+                    "type": "string",
+                    "example": "hot_water"
+                },
+                "start_off": {
+                    "description": "Дата и время начала отключения в формате YYYY-MM-DD HH:MM:SS",
+                    "type": "string",
+                    "example": "2019-01-15 10:00:00"
+                }
+            }
+        },
+        "complaints.Response": {
+            "description": "Ответ с данными жалоб для построения графиков",
+            "type": "object",
+            "properties": {
+                "complaints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ComplaintData"
+                    }
+                },
+                "error": {
+                    "description": "Сообщение об ошибке (если статус ERROR)",
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "description": "Статус операции: OK или ERROR",
+                    "type": "string",
+                    "example": "OK"
+                }
+            }
+        },
+        "internal_http-server_handlers_calendar_day_get.Response": {
+            "description": "Ответ с детальной информацией об отключениях за конкретный день",
+            "type": "object",
+            "properties": {
+                "blackouts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/calendar.InfoOffs"
+                    }
+                },
+                "error": {
+                    "description": "Сообщение об ошибке (если статус ERROR)",
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "description": "Статус операции: OK или ERROR",
+                    "type": "string",
+                    "example": "OK"
+                }
+            }
+        },
+        "internal_http-server_handlers_calendar_month_get.Response": {
+            "description": "Ответ с данными для календаря отключений по дням месяца",
+            "type": "object",
+            "properties": {
+                "dates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/calendar.DateInfo"
+                    }
+                },
+                "error": {
+                    "description": "Сообщение об ошибке (если статус ERROR)",
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "description": "Статус операции: OK или ERROR",
+                    "type": "string",
+                    "example": "OK"
+                }
+            }
+        },
+        "models.ComplaintData": {
+            "description": "Данные жалоб по типам отключений для построения графиков",
+            "type": "object",
+            "properties": {
+                "cold": {
+                    "description": "Количество жалоб на отключение холодной воды",
+                    "type": "integer",
+                    "example": 3
+                },
+                "electricity": {
+                    "description": "Количество жалоб на отключение электричества",
+                    "type": "integer",
+                    "example": 8
+                },
+                "heating": {
+                    "description": "Количество жалоб на отключение отопления",
+                    "type": "integer",
+                    "example": 2
+                },
+                "hot": {
+                    "description": "Количество жалоб на отключение горячей воды",
+                    "type": "integer",
+                    "example": 5
+                },
+                "time": {
+                    "description": "Временная метка точки данных",
+                    "type": "string",
+                    "example": "2019-01-15 14:00:00"
+                }
+            }
+        },
+        "organizations.OrganizationInfo": {
+            "description": "Информация об организации и её отключениях",
+            "type": "object",
+            "properties": {
+                "count_buildings": {
+                    "description": "Количество зданий организации",
+                    "type": "integer",
+                    "example": 106
+                },
+                "last_address": {
+                    "description": "Адрес последнего отключения",
+                    "type": "string",
+                    "example": "Карбышева ул. 54"
+                },
+                "name": {
+                    "description": "Название организации",
+                    "type": "string",
+                    "example": "МУПВ ВПЭС (электрические сети)"
+                },
+                "time_last_blackout": {
+                    "description": "Время последнего отключения в формате \"2006-01-02 15:04:05\"",
+                    "type": "string",
+                    "example": "2019-01-28 09:39:00"
+                }
+            }
+        },
+        "organizations.Response": {
+            "description": "Ответ с информацией об организациях и их отключениях",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Сообщение об ошибке (если статус ERROR)",
+                    "type": "string",
+                    "example": ""
+                },
+                "organizations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/organizations.OrganizationInfo"
+                    }
+                },
+                "status": {
+                    "description": "Статус операции: OK или ERROR",
+                    "type": "string",
+                    "example": "OK"
+                }
+            }
+        },
+        "response.Response": {
+            "description": "Стандартный ответ API",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Сообщение об ошибке (если статус ERROR)",
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "description": "Статус операции: OK или ERROR",
+                    "type": "string",
+                    "example": "OK"
+                }
+            }
+        },
+        "search.Request": {
+            "description": "Запрос для поиска улиц по подстроке",
+            "type": "object",
+            "properties": {
+                "suggest": {
+                    "description": "Подстрока для поиска улиц (минимум 2 символа)",
+                    "type": "string",
+                    "example": "ленин"
+                }
+            }
+        },
+        "search.Response": {
+            "description": "Ответ с найденными улицами",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Сообщение об ошибке (если статус ERROR)",
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "description": "Статус операции: OK или ERROR",
+                    "type": "string",
+                    "example": "OK"
+                },
+                "streets": {
+                    "description": "Список найденных улиц",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "ул. Ленина",
+                        "пр. Ленинский",
+                        "пл. Ленинская"
+                    ]
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
